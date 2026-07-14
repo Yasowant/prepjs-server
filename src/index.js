@@ -56,7 +56,7 @@ const chatLimiter = rateLimit({
 
 app.use("/api", apiLimiter);
 
-app.get("/api/health", (_req, res) => res.json({ ok: true, app: "PrepJS API" }));
+app.get("/api/health", (_req, res) => res.json({ ok: true, app: "DevPrep API" }));
 
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/concepts", conceptRoutes);
@@ -89,6 +89,6 @@ const PORT = process.env.PORT || 4000;
 
 connectDB().then(() => {
   app.listen(PORT, () =>
-    console.log(`🚀 PrepJS ${isProd ? "(production)" : "API"} running on http://localhost:${PORT}`)
+    console.log(`🚀 DevPrep ${isProd ? "(production)" : "API"} running on http://localhost:${PORT}`)
   );
 });

@@ -37,7 +37,7 @@ module.exports = { myFn };`,
     code: `const map = new Map();
 const keyObj = { id: 1 };
 map.set(keyObj, "metadata");   // object as key!
-map.set("name", "PrepJS");
+map.set("name", "DevPrep");
 map.get(keyObj);   // "metadata"
 map.size;          // 2
 for (const [k, v] of map) console.log(k, v);

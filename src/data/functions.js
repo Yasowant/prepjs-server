@@ -40,9 +40,9 @@ const timer = {
 };
 
 const obj = {
-  name: "PrepJS",
+  name: "DevPrep",
   bad: () => console.log(this.name),   // ❌ undefined — no own 'this'
-  good() { console.log(this.name); },  // ✅ "PrepJS"
+  good() { console.log(this.name); },  // ✅ "DevPrep"
 };`,
     questions: [
       { q: "How is 'this' different in arrow functions?", a: "Arrows have no own this — they capture it lexically from the surrounding scope at definition time. call/apply/bind can't change it." },

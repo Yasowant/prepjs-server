@@ -36,16 +36,16 @@ const sealed = Object.seal({ a: 1 });   // can modify, can't add/delete`,
     explanation:
       "`this` is determined by HOW a function is called: (1) method call → the object before the dot, (2) plain call → undefined in strict mode / global object otherwise, (3) constructor (new) → the new instance, (4) call/apply/bind → explicitly set, (5) arrow functions → inherited lexically. Highest priority: new > bind > method > default.",
     code: `const user = {
-  name: "PrepJS",
+  name: "DevPrep",
   greet() { return this.name; },
 };
-user.greet();          // "PrepJS" (method call)
+user.greet();          // "DevPrep" (method call)
 
 const fn = user.greet;
 fn();                  // undefined — lost 'this' (plain call)
 
 const bound = user.greet.bind(user);
-bound();               // "PrepJS"
+bound();               // "DevPrep"
 
 function Person(name) { this.name = name; }
 const p = new Person("Yaso"); // this = new object

@@ -29,7 +29,7 @@ async function sendVerification(user) {
   const link = `${clientUrl()}/verify?token=${token}`;
   await sendEmail({
     to: user.email,
-    subject: "Verify your PrepJS email ⚡",
+    subject: "Verify your DevPrep email ⚡",
     html: verificationEmailHtml(user.name, link),
   });
 }
@@ -125,7 +125,7 @@ router.post("/forgot-password", async (req, res, next) => {
       const link = `${clientUrl()}/reset?token=${token}`;
       await sendEmail({
         to: user.email,
-        subject: "Reset your PrepJS password 🔑",
+        subject: "Reset your DevPrep password 🔑",
         html: resetEmailHtml(user.name, link),
       }).catch((e) => console.error("Reset email failed:", e.message));
     }

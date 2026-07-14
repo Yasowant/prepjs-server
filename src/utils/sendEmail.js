@@ -43,7 +43,7 @@ export async function sendEmail({ to, subject, html }) {
 export function resetEmailHtml(name, link) {
   return `
   <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;background:#0b0f1a;color:#e6ebf5;border-radius:14px;padding:36px">
-    <h1 style="margin:0 0 8px">⚡ Prep<span style="color:#facc15">JS</span></h1>
+    <h1 style="margin:0 0 8px">⚛️ Dev<span style="color:#facc15">Prep</span></h1>
     <h2 style="margin:0 0 16px;font-size:20px">Reset your password, ${name}</h2>
     <p style="color:#94a3b8;line-height:1.6">
       Someone (hopefully you) requested a password reset. Click below to choose a new password.
@@ -64,10 +64,10 @@ export function resetEmailHtml(name, link) {
 export function verificationEmailHtml(name, link) {
   return `
   <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;background:#0b0f1a;color:#e6ebf5;border-radius:14px;padding:36px">
-    <h1 style="margin:0 0 8px">⚡ Prep<span style="color:#facc15">JS</span></h1>
+    <h1 style="margin:0 0 8px">⚛️ Dev<span style="color:#facc15">Prep</span></h1>
     <h2 style="margin:0 0 16px;font-size:20px">Verify your email, ${name} 👋</h2>
     <p style="color:#94a3b8;line-height:1.6">
-      One click and you're in — ${""}76+ JavaScript concepts, quizzes, a VS Code playground and your AI coach are waiting.
+      One click and you're in — 108+ JavaScript & React concepts, 315+ interview Q&A, a VS Code playground and your AI coach are waiting.
     </p>
     <a href="${link}"
        style="display:inline-block;margin:20px 0;padding:14px 28px;background:#facc15;color:#1a1a06;font-weight:bold;border-radius:10px;text-decoration:none">
@@ -77,7 +77,7 @@ export function verificationEmailHtml(name, link) {
       Or copy this link:<br/><a href="${link}" style="color:#38bdf8">${link}</a>
     </p>
     <p style="color:#64748b;font-size:12px;margin-top:24px">
-      Link expires in 24 hours. If you didn't create a PrepJS account, ignore this email.
+      Link expires in 24 hours. If you didn't create a DevPrep account, ignore this email.
     </p>
   </div>`;
 }
