@@ -47,11 +47,22 @@ router.post("/register", async (req, res, next) => {
     if (exists) return res.status(409).json({ message: "Email already registered" });
 
     const user = await User.create({ name, email, password });
-    await sendVerification(user);
+
+    // don't let a broken email provider break registration
+    let emailSent = true;
+    try {
+      await sendVerification(user);
+    } catch (e) {
+      emailSent = false;
+      console.error("Verification email failed for", email, "—", e.message);
+    }
 
     res.status(201).json({
-      message: "Account created! Check your inbox and verify your email to log in.",
+      message: emailSent
+        ? "Account created! Check your inbox and verify your email to log in."
+        : "Account created, but the verification email could not be sent. Use 'Resend verification email' on the login page in a few minutes.",
       email: user.email,
+      emailSent,
     });
   } catch (err) {
     next(err);
@@ -116,7 +127,7 @@ router.post("/forgot-password", async (req, res, next) => {
         to: user.email,
         subject: "Reset your PrepJS password 🔑",
         html: resetEmailHtml(user.name, link),
-      });
+      }).catch((e) => console.error("Reset email failed:", e.message));
     }
     // same response either way — don't leak which emails exist
     res.json({ message: "If that email is registered, a reset link has been sent." });

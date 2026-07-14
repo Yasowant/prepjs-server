@@ -23,12 +23,21 @@ export async function sendEmail({ to, subject, html }) {
     }),
   });
 
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = await res.text();
-    console.error("Resend error:", err);
-    throw new Error("Failed to send email");
+    console.error(`❌ Resend error (HTTP ${res.status}):`, JSON.stringify(data));
+    if (res.status === 403 || data?.message?.includes("domain")) {
+      console.error("👉 Likely cause: EMAIL_FROM domain is not verified in Resend.");
+      console.error("   Fix: resend.com → Domains → verify your domain, OR set EMAIL_FROM=onboarding@resend.dev");
+      console.error("   NOTE: onboarding@resend.dev can ONLY deliver to your own Resend account email!");
+    }
+    if (res.status === 401) {
+      console.error("👉 Likely cause: RESEND_API_KEY is invalid or revoked. Create a new one at resend.com → API Keys.");
+    }
+    throw new Error(data?.message || `Resend HTTP ${res.status}`);
   }
-  return res.json();
+  console.log(`📧 Email sent to ${to} (Resend id: ${data.id})`);
+  return data;
 }
 
 export function resetEmailHtml(name, link) {
