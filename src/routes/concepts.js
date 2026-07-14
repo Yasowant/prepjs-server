@@ -18,6 +18,9 @@ const FREE_CONCEPT_IDS = new Set([
   "how-js-executes",
   "memory-stack-heap",
   "debounce-throttle",
+  "jsx",
+  "state-usestate",
+  "virtual-dom",
 ]);
 
 // GET /api/concepts/categories  (public)
@@ -32,9 +35,13 @@ router.get("/categories", (_req, res) => {
 
 // GET /api/concepts?category=&level=&search=   (public — locked ones are flagged)
 router.get("/", optionalAuth, (req, res) => {
-  const { category, level, search } = req.query;
+  const { category, level, search, track } = req.query;
   const isAuthed = Boolean(req.userId);
   let list = concepts;
+  if (track) {
+    const trackCats = new Set(categories.filter((c) => c.track === track).map((c) => c.id));
+    list = list.filter((c) => trackCats.has(c.category));
+  }
   if (category) list = list.filter((c) => c.category === category);
   if (level) list = list.filter((c) => c.level === level);
   if (search) {
