@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { categories, concepts } from "../data/index.js";
-import { optionalAuth } from "../middleware/auth.js";
+import { optionalAuth, requireAuth } from "../middleware/auth.js";
 
 const router = Router();
 
@@ -31,6 +31,29 @@ router.get("/categories", (_req, res) => {
       count: concepts.filter((x) => x.category === c.id).length,
     }))
   );
+});
+
+// GET /api/concepts/questions — EVERY interview question in one place (login required)
+router.get("/questions", requireAuth, (_req, res) => {
+  const catMeta = Object.fromEntries(categories.map((c) => [c.id, c]));
+  const questions = [];
+  for (const c of concepts) {
+    const meta = catMeta[c.category] || {};
+    for (const qa of c.questions) {
+      questions.push({
+        q: qa.q,
+        a: qa.a,
+        conceptId: c.id,
+        conceptTitle: c.title,
+        category: c.category,
+        categoryName: meta.name || c.category,
+        categoryIcon: meta.icon || "📚",
+        track: meta.track || "js",
+        level: c.level,
+      });
+    }
+  }
+  res.json({ total: questions.length, questions });
 });
 
 // GET /api/concepts?category=&level=&search=   (public — locked ones are flagged)

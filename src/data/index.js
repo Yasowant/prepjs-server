@@ -12,6 +12,7 @@ import internals from "./internals.js";
 import extra from "./extra.js";
 import reactCore from "./react-core.js";
 import reactAdvanced from "./react-advanced.js";
+import reactQuestions from "./react-questions.js";
 
 export const categories = [
   { id: "fundamentals", name: "Fundamentals", icon: "🧱", description: "Variables, types, coercion, operators, loops & strings" },
@@ -46,4 +47,5 @@ export const concepts = [
   ...extra,
   ...reactCore,
   ...reactAdvanced,
+  ...reactQuestions,
 ];
