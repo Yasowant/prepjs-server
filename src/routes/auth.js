@@ -3,6 +3,9 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import { requireAuth } from "../middleware/auth.js";
 import { sendEmail, verificationEmailHtml, resetEmailHtml } from "../utils/sendEmail.js";
+import { uploadAvatar, deleteAvatar, cloudinaryReady } from "../utils/cloudinary.js";
+
+const publicUser = (u) => ({ id: u._id, name: u.name, email: u.email, avatar: u.avatar });
 
 const router = Router();
 
@@ -180,7 +183,7 @@ router.post("/login", async (req, res, next) => {
       });
 
     const tokens = signTokens(user._id.toString());
-    res.json({ user: { id: user._id, name: user.name, email: user.email }, ...tokens });
+    res.json({ user: publicUser(user), ...tokens });
   } catch (err) {
     next(err);
   }
@@ -202,9 +205,39 @@ router.get("/me", requireAuth, async (req, res, next) => {
   try {
     const user = await User.findById(req.userId);
     if (!user) return res.status(404).json({ message: "User not found" });
-    res.json({
-      user: { id: user._id, name: user.name, email: user.email, createdAt: user.createdAt },
-    });
+    res.json({ user: { ...publicUser(user), createdAt: user.createdAt } });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/auth/avatar  { image: "data:image/jpeg;base64,..." }
+router.post("/avatar", requireAuth, async (req, res, next) => {
+  try {
+    if (!cloudinaryReady())
+      return res.status(503).json({ message: "Photo uploads are not configured (missing Cloudinary keys)" });
+
+    const { image } = req.body;
+    if (!image || typeof image !== "string" || !image.startsWith("data:image/"))
+      return res.status(400).json({ message: "A base64 image data URL is required" });
+    if (image.length > 1_400_000)
+      return res.status(413).json({ message: "Image too large — please pick a smaller photo" });
+
+    const url = await uploadAvatar(image, req.userId);
+    const user = await User.findByIdAndUpdate(req.userId, { avatar: url }, { new: true });
+    res.json({ user: publicUser(user) });
+  } catch (err) {
+    console.error("Avatar upload failed:", err.message);
+    res.status(502).json({ message: "Upload failed: " + err.message });
+  }
+});
+
+// DELETE /api/auth/avatar
+router.delete("/avatar", requireAuth, async (req, res, next) => {
+  try {
+    if (cloudinaryReady()) await deleteAvatar(req.userId).catch(() => {});
+    const user = await User.findByIdAndUpdate(req.userId, { avatar: null }, { new: true });
+    res.json({ user: publicUser(user) });
   } catch (err) {
     next(err);
   }
@@ -221,7 +254,7 @@ router.patch("/me", requireAuth, async (req, res, next) => {
       { name: name.trim() },
       { new: true }
     );
-    res.json({ user: { id: user._id, name: user.name, email: user.email } });
+    res.json({ user: publicUser(user) });
   } catch (err) {
     next(err);
   }
