@@ -1,0 +1,22 @@
+# dependencies
+node_modules/
+
+# environment — NEVER commit secrets
+.env
+.env.local
+.env.production
+.env.*.local
+
+# logs
+logs/
+*.log
+npm-debug.log*
+
+# uploads / temp
+uploads/
+tmp/
+
+# editor / OS
+.vscode/
+.idea/
+.DS_Store
