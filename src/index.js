@@ -11,6 +11,7 @@ import conceptRoutes from "./routes/concepts.js";
 import progressRoutes from "./routes/progress.js";
 import quizRoutes from "./routes/quiz.js";
 import chatRoutes from "./routes/chat.js";
+import submissionRoutes from "./routes/submissions.js";
 
 dotenv.config();
 
@@ -61,6 +62,7 @@ app.use("/api/concepts", conceptRoutes);
 app.use("/api/progress", progressRoutes);
 app.use("/api/quiz", quizRoutes);
 app.use("/api/chat", chatLimiter, chatRoutes);
+app.use("/api/submissions", submissionRoutes);
 
 // ---------- serve the built client in production ----------
 if (isProd) {
