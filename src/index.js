@@ -13,6 +13,8 @@ import quizRoutes from "./routes/quiz.js";
 import chatRoutes from "./routes/chat.js";
 import submissionRoutes from "./routes/submissions.js";
 import statsRoutes from "./routes/stats.js";
+import codeRoutes from "./routes/code.js";
+import publicApiRoutes from "./routes/publicApi.js";
 
 dotenv.config();
 
@@ -65,6 +67,8 @@ app.use("/api/quiz", quizRoutes);
 app.use("/api/chat", chatLimiter, chatRoutes);
 app.use("/api/submissions", submissionRoutes);
 app.use("/api/stats", statsRoutes);
+app.use("/api/code", codeRoutes);
+app.use("/api/v1", publicApiRoutes); // public developer API — open CORS
 
 // ---------- serve the built client in production ----------
 if (isProd) {
