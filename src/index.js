@@ -15,6 +15,8 @@ import submissionRoutes from "./routes/submissions.js";
 import statsRoutes from "./routes/stats.js";
 import codeRoutes from "./routes/code.js";
 import publicApiRoutes from "./routes/publicApi.js";
+import gamifyRoutes from "./routes/gamify.js";
+import interviewRoutes from "./routes/interview.js";
 
 dotenv.config();
 
@@ -69,6 +71,8 @@ app.use("/api/submissions", submissionRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/code", codeRoutes);
 app.use("/api/v1", publicApiRoutes); // public developer API — open CORS
+app.use("/api/gamify", gamifyRoutes);
+app.use("/api/interview", chatLimiter, interviewRoutes);
 
 // ---------- serve the built client in production ----------
 if (isProd) {

@@ -8,6 +8,12 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true, minlength: 6, select: false },
     isVerified: { type: Boolean, default: false },
     avatar: { type: String, default: null }, // Cloudinary URL
+    // gamification
+    xp: { type: Number, default: 0 },
+    streak: { type: Number, default: 0 },
+    longestStreak: { type: Number, default: 0 },
+    lastActiveOn: { type: String, default: null }, // "YYYY-MM-DD" (IST)
+    badges: { type: [String], default: [] },
   },
   { timestamps: true }
 );

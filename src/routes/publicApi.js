@@ -91,7 +91,7 @@ router.get("/", (_req, res) => {
   res.json({
     name: "DevPrep Public API",
     description: "Free fake REST API for practice — no auth, no key, CORS enabled. Writes are simulated.",
-    docs: "https://prepjs-client.vercel.app/api",
+    docs: "https://devprep.esscentra.in/api",
     endpoints: {
       users: "/api/v1/users · /api/v1/users/:id · /api/v1/users/search?q=",
       products: "/api/v1/products · /api/v1/products/:id · /api/v1/products/search?q=",

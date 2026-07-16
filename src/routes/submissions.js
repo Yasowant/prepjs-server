@@ -1,6 +1,7 @@
 import { Router } from "express";
 import Submission from "../models/Submission.js";
 import { requireAuth } from "../middleware/auth.js";
+import { recordActivity } from "../utils/gamify.js";
 
 const router = Router();
 router.use(requireAuth);
@@ -12,15 +13,41 @@ router.post("/", async (req, res, next) => {
     if (!problemId || typeof passed !== "number" || typeof total !== "number" || !code)
       return res.status(400).json({ message: "problemId, passed, total and code are required" });
 
+    const accepted = passed === total && total > 0;
+
+    // was this problem already solved before? (first solve pays more XP)
+    const solvedBefore = accepted
+      ? await Submission.exists({ user: req.userId, problemId, status: "accepted" })
+      : true;
+
     const submission = await Submission.create({
       user: req.userId,
       problemId,
       passed,
       total,
       code: String(code).slice(0, 20000),
-      status: passed === total && total > 0 ? "accepted" : "failed",
+      status: accepted ? "accepted" : "failed",
     });
-    res.status(201).json(submission);
+
+    // gamification: 30 XP first solve, 5 XP re-solve, 2 XP for trying
+    let gamify = null;
+    if (accepted) {
+      const solvedIds = await Submission.distinct("problemId", {
+        user: req.userId,
+        status: "accepted",
+      });
+      gamify = await recordActivity(req.userId, solvedBefore ? 5 : 30, {
+        solvedCount: solvedIds.length,
+      });
+    } else {
+      gamify = await recordActivity(req.userId, 2, {});
+    }
+
+    res.status(201).json({
+      ...submission.toObject(),
+      xpGained: accepted ? (solvedBefore ? 5 : 30) : 2,
+      newBadges: gamify?.newBadges || [],
+    });
   } catch (err) {
     next(err);
   }

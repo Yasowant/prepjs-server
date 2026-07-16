@@ -2,6 +2,7 @@ import { Router } from "express";
 import { quizzes } from "../data/quizzes.js";
 import QuizResult from "../models/QuizResult.js";
 import { requireAuth } from "../middleware/auth.js";
+import { recordActivity } from "../utils/gamify.js";
 
 const router = Router();
 
@@ -47,7 +48,23 @@ router.post("/:category/submit", requireAuth, async (req, res, next) => {
       total: qs.length,
       answers,
     });
-    res.json({ score, total: qs.length, review, resultId: saved._id });
+
+    // gamification: 5 XP per correct answer, +20 bonus for a perfect score
+    const quizCount = await QuizResult.countDocuments({ user: req.userId });
+    const perfect = score === qs.length && qs.length > 0;
+    const gamify = await recordActivity(req.userId, score * 5 + (perfect ? 20 : 0), {
+      quizCount,
+      perfectQuiz: perfect,
+    });
+
+    res.json({
+      score,
+      total: qs.length,
+      review,
+      resultId: saved._id,
+      xpGained: gamify ? score * 5 + (perfect ? 20 : 0) : 0,
+      newBadges: gamify?.newBadges || [],
+    });
   } catch (err) {
     next(err);
   }
