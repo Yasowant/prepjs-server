@@ -85,20 +85,23 @@ router.get("/", optionalAuth, (req, res) => {
   );
 });
 
-// GET /api/concepts/:id  (free ones public, rest need login)
+// GET /api/concepts/:id
+// Explanation + code example are PUBLIC on every concept (SEO — Google indexes them).
+// The interview Q&A is the login hook: hidden for guests on non-free concepts.
 router.get("/:id", optionalAuth, (req, res) => {
   const concept = concepts.find((c) => c.id === req.params.id);
   if (!concept) return res.status(404).json({ message: "Concept not found" });
 
-  if (!req.userId && !FREE_CONCEPT_IDS.has(concept.id)) {
-    return res.status(403).json({
-      message: "This concept is locked. Log in free to unlock all concepts.",
-      code: "LOGIN_REQUIRED",
-      title: concept.title,
-      level: concept.level,
-    });
-  }
-  res.json({ ...concept, free: FREE_CONCEPT_IDS.has(concept.id) });
+  const isFree = FREE_CONCEPT_IDS.has(concept.id);
+  const qaUnlocked = Boolean(req.userId) || isFree;
+
+  res.json({
+    ...concept,
+    free: isFree,
+    questions: qaUnlocked ? concept.questions : [],
+    questionCount: concept.questions.length,
+    qaLocked: !qaUnlocked,
+  });
 });
 
 export default router;
