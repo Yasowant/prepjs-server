@@ -66,13 +66,31 @@ router.get("/certificates", requireAuth, async (req, res, next) => {
     const done = new Map(entries.map((e) => [e.conceptId, e.updatedAt]));
 
     const tracks = CERT_TRACKS.map((t) => {
-      const catIds = new Set(categories.filter((c) => c.track === t.id).map((c) => c.id));
+      const trackCats = categories.filter((c) => c.track === t.id);
+      const catIds = new Set(trackCats.map((c) => c.id));
       const list = concepts.filter((c) => catIds.has(c.category));
       const completed = list.filter((c) => done.has(c.id));
       const earned = list.length > 0 && completed.length === list.length;
       const earnedAt = earned
         ? new Date(Math.max(...completed.map((c) => new Date(done.get(c.id)).getTime())))
         : null;
+
+      // per-category breakdown + exactly which concepts remain
+      const byCategory = trackCats.map((cat) => {
+        const catConcepts = list.filter((c) => c.category === cat.id);
+        const catDone = catConcepts.filter((c) => done.has(c.id)).length;
+        return {
+          id: cat.id,
+          name: cat.name,
+          icon: cat.icon,
+          total: catConcepts.length,
+          completed: catDone,
+        };
+      });
+      const remaining = list
+        .filter((c) => !done.has(c.id))
+        .map((c) => ({ id: c.id, title: c.title, category: c.category }));
+
       return {
         id: t.id,
         name: t.name,
@@ -81,6 +99,8 @@ router.get("/certificates", requireAuth, async (req, res, next) => {
         percent: list.length ? Math.round((completed.length / list.length) * 100) : 0,
         earned,
         earnedAt,
+        byCategory,
+        remaining,
       };
     });
 
