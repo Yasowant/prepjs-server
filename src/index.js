@@ -18,6 +18,7 @@ import publicApiRoutes from "./routes/publicApi.js";
 import gamifyRoutes from "./routes/gamify.js";
 import interviewRoutes from "./routes/interview.js";
 import reactlabRoutes from "./routes/reactlab.js";
+import noteRoutes from "./routes/notes.js";
 
 dotenv.config();
 
@@ -75,6 +76,7 @@ app.use("/api/v1", publicApiRoutes); // public developer API — open CORS
 app.use("/api/gamify", gamifyRoutes);
 app.use("/api/interview", chatLimiter, interviewRoutes);
 app.use("/api/reactlab", chatLimiter, reactlabRoutes);
+app.use("/api/notes", noteRoutes);
 
 // ---------- serve the built client in production ----------
 if (isProd) {

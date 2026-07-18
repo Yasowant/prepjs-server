@@ -1,9 +1,53 @@
 import { Router } from "express";
 import User from "../models/User.js";
-import { requireAuth } from "../middleware/auth.js";
+import { requireAuth, optionalAuth } from "../middleware/auth.js";
 import { levelFromXp, istDateString } from "../utils/gamify.js";
 
 const router = Router();
+
+// GET /api/gamify/leaderboard — top 50 by XP (public); includes your rank if logged in
+router.get("/leaderboard", optionalAuth, async (req, res, next) => {
+  try {
+    const top = await User.find({ isVerified: true })
+      .sort({ xp: -1, createdAt: 1 })
+      .limit(50)
+      .select("name avatar xp streak badges");
+
+    const rows = top.map((u, i) => ({
+      rank: i + 1,
+      name: u.name,
+      avatar: u.avatar,
+      xp: u.xp,
+      level: levelFromXp(u.xp),
+      streak: u.streak,
+      badges: u.badges.length,
+      isMe: req.userId ? String(u._id) === String(req.userId) : false,
+    }));
+
+    // logged in but outside the top 50 → append your own rank
+    let me = null;
+    if (req.userId && !rows.some((r) => r.isMe)) {
+      const self = await User.findById(req.userId).select("name avatar xp streak badges");
+      if (self) {
+        const ahead = await User.countDocuments({ isVerified: true, xp: { $gt: self.xp } });
+        me = {
+          rank: ahead + 1,
+          name: self.name,
+          avatar: self.avatar,
+          xp: self.xp,
+          level: levelFromXp(self.xp),
+          streak: self.streak,
+          badges: self.badges.length,
+          isMe: true,
+        };
+      }
+    }
+
+    res.json({ top: rows, me });
+  } catch (err) {
+    next(err);
+  }
+});
 
 // GET /api/gamify/me — xp, level, streak, badges for the dashboard
 router.get("/me", requireAuth, async (req, res, next) => {
