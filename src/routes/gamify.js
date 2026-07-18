@@ -1,7 +1,14 @@
 import { Router } from "express";
 import User from "../models/User.js";
+import Progress from "../models/Progress.js";
+import { categories, concepts } from "../data/index.js";
 import { requireAuth, optionalAuth } from "../middleware/auth.js";
 import { levelFromXp, istDateString } from "../utils/gamify.js";
+
+const CERT_TRACKS = [
+  { id: "js", name: "JavaScript Mastery" },
+  { id: "react", name: "React.js Mastery" },
+];
 
 const router = Router();
 
@@ -44,6 +51,40 @@ router.get("/leaderboard", optionalAuth, async (req, res, next) => {
     }
 
     res.json({ top: rows, me });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/gamify/certificates — track completion + earned certificates
+router.get("/certificates", requireAuth, async (req, res, next) => {
+  try {
+    const [entries, user] = await Promise.all([
+      Progress.find({ user: req.userId, status: "completed" }).select("conceptId updatedAt"),
+      User.findById(req.userId).select("name"),
+    ]);
+    const done = new Map(entries.map((e) => [e.conceptId, e.updatedAt]));
+
+    const tracks = CERT_TRACKS.map((t) => {
+      const catIds = new Set(categories.filter((c) => c.track === t.id).map((c) => c.id));
+      const list = concepts.filter((c) => catIds.has(c.category));
+      const completed = list.filter((c) => done.has(c.id));
+      const earned = list.length > 0 && completed.length === list.length;
+      const earnedAt = earned
+        ? new Date(Math.max(...completed.map((c) => new Date(done.get(c.id)).getTime())))
+        : null;
+      return {
+        id: t.id,
+        name: t.name,
+        total: list.length,
+        completed: completed.length,
+        percent: list.length ? Math.round((completed.length / list.length) * 100) : 0,
+        earned,
+        earnedAt,
+      };
+    });
+
+    res.json({ name: user?.name || "DevPrep Learner", tracks });
   } catch (err) {
     next(err);
   }
