@@ -19,6 +19,7 @@ import gamifyRoutes from "./routes/gamify.js";
 import interviewRoutes from "./routes/interview.js";
 import reactlabRoutes from "./routes/reactlab.js";
 import noteRoutes from "./routes/notes.js";
+import newsRoutes from "./routes/news.js";
 
 dotenv.config();
 
@@ -77,6 +78,7 @@ app.use("/api/gamify", gamifyRoutes);
 app.use("/api/interview", chatLimiter, interviewRoutes);
 app.use("/api/reactlab", chatLimiter, reactlabRoutes);
 app.use("/api/notes", noteRoutes);
+app.use("/api/news", newsRoutes);
 
 // ---------- serve the built client in production ----------
 if (isProd) {
